@@ -9,14 +9,16 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 IniFile := "Configuration.ini"
 
 ;Heal_Bot_State := 0
-HP_Monitor_State := [1, 0, 0, 0, 0, 0] ; group members
+HP_Monitor_State := [] ; group members
 0_x_HP_Character := [1256, 1187, 1187, 1187, 1187, 1187] ; hp bar start
 100_x_HP_Character := [1659, 1659, 1659, 1659, 1659, 1659] ; hp bar end
 Y_HP_Character := [1149, 1473, 1473, 1473, 1473, 1473] ; Yloc of HP bar
 HP_color_character := [0xD90000, 0xD90000, 0xD90000, 0xD90000, 0xD90000, 0xD90000] ; HP bar color RGB format
 heal_at_Percent := [90, 90, 90, 90, 90, 90] ; percentage to heal
-;check_box_state :=[1, 1, 1, 1, 1, 1]
-;Healer_PID := 0
+check_box_state :=[]
+Healer_PID := 0
+Primary_Client := 0
+;Heal_Button := 0
 
 IfExist, %IniFile%
 {
@@ -44,17 +46,25 @@ IfExist, %IniFile%
 			
 			iniread, Healer_PID, %inifile%, Heal Bot Monitor, Healer PID
 			
-			iniread, Heal_Bot_State, %inifile%, Heal Bot Monitor, `Enabled `or `Disabled
+			iniread, Heal_Bot_State, %inifile%, Heal Bot Monitor, Enabled or Disabled
+			
+			iniread, Heal_Button, %inifile%, Heal Bot Monitor, Heal Button
+			
+			iniread, Primary_Client, %inifile%, Heal Bot Monitor, Primary Client
 		}
 		if Heal_Bot_State = 0
 		{
-			msgbox, turned off
+			;msgbox, turned off
 			break
 		}
 		else if Heal_Bot_State = 1
 		{
 			
-			Health_Monitor(100_x_HP_Character, 0_x_HP_Character, Y_HP_Character, HP_color_character, heal_at_Percent, HP_Monitor_State, Heal_Bot_State)
+			IfWinActive %Primary_Client%
+			{
+				;msgbox, active
+				Health_Monitor(100_x_HP_Character, 0_x_HP_Character, Y_HP_Character, HP_color_character, heal_at_Percent, HP_Monitor_State, Heal_Bot_State, Heal_Button, Healer_PID)
+			}
 		}
 	}
 	return
@@ -207,7 +217,7 @@ Heal_Bot_GUI:
 	Gui Add, Text, x224 y736 w85 h23 +0x200, HP Color:
 	Gui Add, Edit, x305 y736 w56 h21 vHP_color_character_6, % HP_color_character_6
 ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	Gui Add, Text, x424 y8 w120 h23 +0x200, When to heal
+	Gui Add, Text, x424 y8 w180 h23 +0x200, When to heal. EXCEPT 48-52`%
 	
 	Gui Add, Text, x424 y48 w150 h23 +0x200, Group Member 1, Heal at:
 	Gui Add, edit, x575 y48 w25 h23 vheal_at_Percent_1, % heal_at_Percent_1 ; group member 1 80% health check
@@ -242,8 +252,14 @@ Heal_Bot_GUI:
 	Gui Add, Text, x424 y312 w120 h23 +0x200, Ctrl F1 Get Color:
 	Gui Add, edit, x552 y312 w60 h23 vgetcolor, % getcolor
 	
-	Gui Add, Text, x424 y360 w145 h23 +0x200, Healer PID:
-	Gui Add, Edit, x495 y360 w161 h21 vhealer_PID, % healer_PID
+	Gui Add, Text, x424 y436 w180 h23 +0x200, Primary Client :
+	Gui Add, Edit, x520 y436 w161 h21 vPrimary_Client, % Primary_Client
+	
+	Gui Add, Text, x424 y460 w145 h23 +0x200, Healer PID:
+	Gui Add, Edit, x500 y460 w161 h21 vhealer_PID, % healer_PID
+	
+	Gui Add, Text, x424 y484 w145 h23 +0x200, Heal Button:
+	Gui Add, hotkey, x500 y484 w161 h21 vHeal_Button, % Heal_Button
 ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~	
 	Gui Add, checkbox, x48 y896 w150 h25 vHeal_Bot_State Checked%Heal_Bot_State%, Heal monitor On | Off
 	Gui Add, Button, x48 y944 w80 h23 gGuiSave, Apply
@@ -280,6 +296,10 @@ GUISave:
 		iniwrite,% healer_PID, %inifile%, Heal Bot Monitor, Healer PID
 		
 		iniwrite,% Heal_Bot_State, %inifile%, Heal Bot Monitor, Enabled or Disabled
+		
+		iniwrite,% Heal_Button, %inifile%, Heal Bot Monitor, Heal Button
+		
+		iniwrite,% Primary_Client, %inifile%, Heal Bot Monitor, Primary Client
 	}
 	return
 }
@@ -319,108 +339,101 @@ gui, show
 
 return
 
-Health_Monitor(100_x_HP_Character, 0_x_HP_Character, Y_HP_Character, HP_color_character, heal_at_Percent, HP_Monitor_State, Heal_Bot_State)
+Health_Monitor(100_x_HP_Character, 0_x_HP_Character, Y_HP_Character, HP_color_character, heal_at_Percent, HP_Monitor_State, Heal_Bot_State, Heal_Button, Healer_PID)
 {
-	loop
-	{
-		if HP_Monitor_State[1] = 1
-		{	
-			Monitor_Health := ((100_x_HP_Character[a_index] - 0_x_HP_Character[a_index]) / 100 * heal_at_Percent[a_index])
-		;msgbox, % "monitor health " Monitor_Health_%a_index% "100 hp start location "100_x_HP_Character[a_index] "0 hp start location " 0_x_HP_Character[a_index] "Percentage to heal at " heal_at_Percent[a_index]
-			PixelGetColor, Current_Health%a_index%, Monitor_Health, Y_HP_Character[a_index], RGB
-		;msgbox, %  "color of current pixel" Current_Health%a_index% ; pixel color of location monitored
-			if (Current_Health%a_index% = HP_color_character[a_index]) ; verifying pixel grabbed is same as hp bar red
-			{
-				msgbox, do nothing 1 ;	nothing
-				sleep -1
-			}
-			else
-			{
-				msgbox, do something 1 ;	controlsend,, 1, ahk_pid 85132 ; pixel grabbed is not red meaning health is lost
-				sleep, 350 ; 3.5 seconds
-			}
+	if HP_Monitor_State[1] = 1
+	{	
+		Monitor_Health_1 := (((100_x_HP_Character[1] - 0_x_HP_Character[1]) / 100 * heal_at_Percent[1]) + 0_x_HP_Character[1])
+		PixelGetColor, Current_Health_1, Monitor_Health_1, Y_HP_Character[1], RGB
+		if (Current_Health_1 = HP_color_character[1]) ; verifying pixel grabbed is same as hp bar red
+		{
+			sleep -1
 		}
-		
-		if HP_Monitor_State[2] = 1
-		{	
-			Monitor_Health := ((100_x_HP_Character[a_index] - 0_x_HP_Character[a_index]) / 100 * heal_at_Percent[a_index])
-			PixelGetColor, Current_Health%a_index%, Monitor_Health, Y_HP_Character[a_index], RGB
-			if (Current_Health%a_index% = HP_color_character[a_index]) ; verifying pixel grabbed is same as hp bar red
-			{
-				msgbox, do nothing 2 ;	nothing
-				sleep -1
-			}
-			else
-			{
-				msgbox, do something 2 ;	controlsend,, 1, ahk_pid 85132 ; pixel grabbed is not red meaning health is lost
-				sleep, 350 ; 3.5 seconds
-			}
+		else
+		{
+			controlsend,, %Heal_Button%, %Healer_PID% ; pixel grabbed is not red meaning health is lost
+			sleep, 350 ; 3.5 seconds
 		}
-		
-		if HP_Monitor_State[3] = 1
-		{	
-			Monitor_Health := ((100_x_HP_Character[a_index] - 0_x_HP_Character[a_index]) / 100 * heal_at_Percent[a_index])
-			PixelGetColor, Current_Health%a_index%, Monitor_Health, Y_HP_Character[a_index], RGB
-			if (Current_Health%a_index% = HP_color_character[a_index]) ; verifying pixel grabbed is same as hp bar red
-			{
-				msgbox, do nothing 3 ;	nothing						sleep -1
-				sleep -1
-			}
-			else
-			{
-				msgbox, do something 3 ;	controlsend,, 1, ahk_pid 85132 ; pixel grabbed is not red meaning health is lost
-				sleep, 350 ; 3.5 seconds
-			}	
+	}
+	
+	if HP_Monitor_State[2] = 1
+	{	
+		Monitor_Health_2 := (((100_x_HP_Character[2] - 0_x_HP_Character[2]) / 100 * heal_at_Percent[2]) + 0_x_HP_Character[2])
+		PixelGetColor, Current_Health_2, Monitor_Health_2, Y_HP_Character[2], RGB
+		if (Current_Health_2 = HP_color_character[2]) ; verifying pixel grabbed is same as hp bar red
+		{
+			msgbox, do nothing 2 ;	nothing
+			sleep -1
 		}
-		
-		if HP_Monitor_State[4] = 1
-		{	
-			Monitor_Health := ((100_x_HP_Character[a_index] - 0_x_HP_Character[a_index]) / 100 * heal_at_Percent[a_index])
-			PixelGetColor, Current_Health%a_index%, Monitor_Health, Y_HP_Character[a_index], RGB
-			if (Current_Health%a_index% = HP_color_character[a_index]) ; verifying pixel grabbed is same as hp bar red
-			{
-				msgbox, do nothing 4 ;	nothing						sleep -1
-				sleep -1
-			}
-			else
-			{
-				msgbox, do something 4 ;	controlsend,, 1, ahk_pid 85132 ; pixel grabbed is not red meaning health is lost
-				sleep, 350 ; 3.5 seconds
-			}	
+		else
+		{
+			msgbox, do something 2 ;	controlsend,, 1, ahk_pid 85132 ; pixel grabbed is not red meaning health is lost
+			sleep, 350 ; 3.5 seconds
 		}
-		
-		if HP_Monitor_State[5] = 1
-		{	
-			Monitor_Health := ((100_x_HP_Character[a_index] - 0_x_HP_Character[a_index]) / 100 * heal_at_Percent[a_index])
-			PixelGetColor, Current_Health%a_index%, Monitor_Health, Y_HP_Character[a_index], RGB
-			if (Current_Health%a_index% = HP_color_character[a_index]) ; verifying pixel grabbed is same as hp bar red
-			{
-				msgbox, do nothing 5 ;	nothing						sleep -1
-				sleep -1
-			}
-			else
-			{
-				msgbox, do something 5 ;	controlsend,, 1, ahk_pid 85132 ; pixel grabbed is not red meaning health is lost
-				sleep, 350 ; 3.5 seconds
-			}
+	}
+	
+	if HP_Monitor_State[3] = 1
+	{	
+		Monitor_Health_3 := (((100_x_HP_Character[3] - 0_x_HP_Character[3]) / 100 * heal_at_Percent[3]) + 0_x_HP_Character[3])
+		PixelGetColor, Current_Health_3, Monitor_Health_3, Y_HP_Character[3], RGB
+		if (Current_Health_3 = HP_color_character[3]) ; verifying pixel grabbed is same as hp bar red
+		{
+			msgbox, do nothing 3 ;	nothing						sleep -1
+			sleep -1
 		}
-		
-		if HP_Monitor_State[6] = 1
-		{	
-			Monitor_Health := ((100_x_HP_Character[a_index] - 0_x_HP_Character[a_index]) / 100 * heal_at_Percent[a_index])
-			PixelGetColor, Current_Health%a_index%, Monitor_Health, Y_HP_Character[a_index], RGB
-			if (Current_Health%a_index% = HP_color_character[a_index]) ; verifying pixel grabbed is same as hp bar red
-			{
-				msgbox, do nothing 6 ;	nothing						sleep -1
-				sleep -1
-			}
-			else
-			{
-				msgbox, do something 6 ;	controlsend,, 1, ahk_pid 85132 ; pixel grabbed is not red meaning health is lost
-				sleep, 350 ; 3.5 seconds
-			}	
+		else
+		{
+			msgbox, do something 3 ;	controlsend,, 1, ahk_pid 85132 ; pixel grabbed is not red meaning health is lost
+			sleep, 350 ; 3.5 seconds
+		}	
+	}
+	
+	if HP_Monitor_State[4] = 1
+	{	
+		Monitor_Health_4 := (((100_x_HP_Character[4] - 0_x_HP_Character[4]) / 100 * heal_at_Percent[4]) + 0_x_HP_Character[4])
+		PixelGetColor, Current_Health_4, Monitor_Health_4, Y_HP_Character[4], RGB
+		if (Current_Health_4 = HP_color_character[4]) ; verifying pixel grabbed is same as hp bar red
+		{
+			msgbox, do nothing 4 ;	nothing						sleep -1
+			sleep -1
 		}
-		break
+		else
+		{
+			msgbox, do something 4 ;	controlsend,, 1, ahk_pid 85132 ; pixel grabbed is not red meaning health is lost
+			sleep, 350 ; 3.5 seconds
+		}	
+	}
+	
+	if HP_Monitor_State[5] = 1
+	{	
+		Monitor_Health_5 := (((100_x_HP_Character[5] - 0_x_HP_Character[5]) / 100 * heal_at_Percent[5]) + 0_x_HP_Character[5])
+		PixelGetColor, Current_Health_5, Monitor_Health_5, Y_HP_Character[5], RGB
+		if (Current_Health_5 = HP_color_character[5]) ; verifying pixel grabbed is same as hp bar red
+		{
+			msgbox, do nothing 5 ;	nothing						sleep -1
+			sleep -1
+		}
+		else
+		{
+			msgbox, do something 5 ;	controlsend,, 1, ahk_pid 85132 ; pixel grabbed is not red meaning health is lost
+			sleep, 350 ; 3.5 seconds
+		}
+	}
+	
+	if HP_Monitor_State[6] = 1
+	{	
+		Monitor_Health_6 := (((100_x_HP_Character[6] - 0_x_HP_Character[6]) / 100 * heal_at_Percent[6]) + 0_x_HP_Character[6])
+		PixelGetColor, Current_Health_6, Monitor_Health, Y_HP_Character[6], RGB
+		if (Current_Health_6 = HP_color_character[6]) ; verifying pixel grabbed is same as hp bar red
+		{
+			msgbox, do nothing 6 ;	nothing						sleep -1
+			sleep -1
+		}
+		else
+		{
+			msgbox, do something 6 ;	controlsend,, 1, ahk_pid 85132 ; pixel grabbed is not red meaning health is lost
+			sleep, 350 ; 3.5 seconds
+		}	
 	}
 	return
 }
