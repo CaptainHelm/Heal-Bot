@@ -18,10 +18,12 @@ heal_at_Percent := [90, 90, 90, 90, 90, 90] ; percentage to heal
 check_box_state :=[]
 Healer_PID := 0
 Primary_Client := 0
-;Heal_Button := 0
+Primary_Heal := [0, 0, 0, 0, 0, 0]
+Secondary_Heal := [0, 0, 0, 0, 0, 0] ;need to add toggle functionality or priority
 
 IfExist, %IniFile%
 {
+	sleep, 100
 	loop 
 	{
 		loop, 6
@@ -51,22 +53,31 @@ IfExist, %IniFile%
 			iniread, Heal_Button, %inifile%, Heal Bot Monitor, Heal Button
 			
 			iniread, Primary_Client, %inifile%, Heal Bot Monitor, Primary Client
-		}
-		if Heal_Bot_State = 0
-		{
-			;msgbox, turned off
-			break
-		}
-		else if Heal_Bot_State = 1
-		{
 			
-			IfWinActive %Primary_Client%
+			iniread, Primary_Heal_%a_index%, %inifile%, Group HP Monitor, Group Member %a_index% Primary Heal
+			Primary_Heal[a_index] := Primary_Heal_%a_index%
+			
+			iniread, Secondary_Heal_%a_index%, %inifile%, Group HP Monitor, Group Member %a_index% Secondary Heal
+			Secondary_Heal[a_index] := Secondary_Heal_%a_index%
+			
+		}
+		IfWinActive, %Primary_Client%
+		{
+			if Heal_Bot_State = 0
 			{
-				;msgbox, active
-				Health_Monitor(100_x_HP_Character, 0_x_HP_Character, Y_HP_Character, HP_color_character, heal_at_Percent, HP_Monitor_State, Heal_Bot_State, Heal_Button, Healer_PID)
+				break
+			}
+			else if Heal_Bot_State = 1
+			{
+				sleep 50
+				Health_Monitor(100_x_HP_Character, 0_x_HP_Character, Y_HP_Character, HP_color_character, heal_at_Percent, HP_Monitor_State, Heal_Bot_State, Heal_Button, Healer_PID, Primary_Heal, Primary_Client)
+			}
+			else
+			{
+				break
 			}
 		}
-	}
+	}	
 	return
 }
 
@@ -88,13 +99,19 @@ Heal_Bot_GUI:
 	Gui Add, Text, x48 y96 w100 h23 +0x200, Y Coord Location:
 	Gui Add, Edit, x155 y96 w56 h21 vY_HP_Character_1, % Y_HP_Character_1 ; Y start
 	
+	Gui Add, Text, x48 y120 w100 h23 +0x200, Primary Heal:
+	Gui Add, hotkey, x130 y120 w90 h21 vPrimary_Heal_1, % Primary_Heal_1
+	
+	Gui Add, Text, x224 y120 w100 h23 +0x200, Secondary Heal:
+	Gui Add, hotkey, x320 y120 w90 h21 vSecondary_Heal_1, % Secondary_Heal_1
+	
 	Gui Add, Text, x224 y48 w163 h23 +0x200, Group Member 1 Health End
 	
 	Gui Add, Text, x224 y72 w85 h23 +0x200, X Coord End:
 	Gui Add, Edit, x305 y72 w56 h21 v100_x_HP_Character_1, % 100_x_HP_Character_1
 	
 	Gui Add, Text, x224 y96 w85 h23 +0x200, HP Color:
-	Gui Add, Edit, x305 y96 w56 h21 vHP_color_character_1, % HP_color_character_1
+	Gui Add, Edit, x305 y96 w70 h21 vHP_color_character_1, % HP_color_character_1
 ;~~~~~~~~~~~~~~~~~~~~~~~~ Group Member 2 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	gui, font, underline 
 	Gui Add, Text, x48 y152 w200 h23 +0x200, Group Member 2 Health Monitor
@@ -112,13 +129,19 @@ Heal_Bot_GUI:
 	Gui Add, Edit, x155 y224 w56 h21 vY_HP_Character_2, % Y_HP_Character_2
 	;Gui Add, Button, x48 y248 w80 h23, Save
 	
+	Gui Add, Text, x48 y248 w100 h23 +0x200, Primary Heal:
+	Gui Add, hotkey, x130 y248 w90 h21 vPrimary_Heal_2, % Primary_Heal_2
+	
+	Gui Add, Text, x224 y248 w100 h23 +0x200, Secondary Heal:
+	Gui Add, hotkey, x320 y248 w90 h21 vSecondary_Heal_2, % Secondary_Heal_2
+	
 	Gui Add, Text, x224 y176 w163 h23 +0x200, Group Member 2 Health End
 	
 	Gui Add, Text, x224 y200 w85 h23 +0x200, X Coord End:
 	Gui Add, Edit, x305 y200 w56 h21 v100_x_HP_Character_2, % 100_x_HP_Character_2
 	
 	Gui Add, Text, x224 y224 w85 h23 +0x200, HP Color
-	Gui Add, Edit, x305 y224 w56 h21 vHP_color_character_2, % HP_color_character_2
+	Gui Add, Edit, x305 y224 w70 h21 vHP_color_character_2, % HP_color_character_2
 ;~~~~~~~~~~~~~~~~~~~~~~~~ Group Member 3 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	gui, font, underline 
 	Gui Add, Text, x48 y280 w200 h23 +0x200, Group Member 3 Health Monitor
@@ -136,13 +159,19 @@ Heal_Bot_GUI:
 	Gui Add, Edit, x155 y352 w56 h21 vY_HP_Character_3, % Y_HP_Character_3
 	;Gui Add, Button, x48 y376 w80 h23, Save
 	
+	Gui Add, Text, x48 y376 w100 h23 +0x200, Primary Heal:
+	Gui Add, hotkey, x130 y376 w90 h21 vPrimary_Heal_3, % Primary_Heal_3
+	
+	Gui Add, Text, x224 y376 w100 h23 +0x200, Secondary Heal:
+	Gui Add, hotkey, x320 y376 w90 h21 vSecondary_Heal_3, % Secondary_Heal_3
+	
 	Gui Add, Text, x224 y304 w163 h23 +0x200, Group Member 3 Health End
 	
 	Gui Add, Text, x224 y328 w85 h23 +0x200, X Coord End:
 	Gui Add, Edit, x305 y328 w56 h21 v100_x_HP_Character_3, % 100_x_HP_Character_3 
 	
 	Gui Add, Text, x224 y352 w85 h23 +0x200, HP Color:
-	Gui Add, Edit, x305 y352 w56 h21 vHP_color_character_3, % HP_color_character_3
+	Gui Add, Edit, x305 y352 w70 h21 vHP_color_character_3, % HP_color_character_3
 	;Gui Add, Button, x224 y376 w80 h23, Save
 ;~~~~~~~~~~~~~~~~~~~~~~~~ Group Member 4 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	gui, font, underline 
@@ -161,13 +190,19 @@ Heal_Bot_GUI:
 	Gui Add, Edit, x155 y480 w56 h21 vY_HP_Character_4, % Y_HP_Character_4
 	;Gui Add, Button, x48 y504 w80 h23, Save
 	
+	Gui Add, Text, x48 y504 w100 h23 +0x200, Primary Heal:
+	Gui Add, hotkey, x130 y504 w90 h21 vPrimary_Heal_4, % Primary_Heal_4
+	
+	Gui Add, Text, x224 y504 w100 h23 +0x200, Secondary Heal:
+	Gui Add, hotkey, x320 y504 w90 h21 vSecondary_Heal_4, % Secondary_Heal_4
+	
 	Gui Add, Text, x224 y432 w163 h23 +0x200, Group Member 4 Health End
 	
 	Gui Add, Text, x224 y456 w85 h23 +0x200, X Coord End:
 	Gui Add, Edit, x305 y456 w56 h21 v100_x_HP_Character_4, % 100_x_HP_Character_4
 	
 	Gui Add, Text, x224 y480 w85 h23 +0x200, HP Color:
-	Gui Add, Edit, x305 y480 w56 h21 vHP_color_character_4, % HP_color_character_4
+	Gui Add, Edit, x305 y480 w70 h21 vHP_color_character_4, % HP_color_character_4
 ;~~~~~~~~~~~~~~~~~~~~~~~~ Group Member 5 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	gui, font, underline
 	Gui Add, Text, x48 y536 w200 h23 +0x200, Group Member 5 Health Monitor
@@ -183,7 +218,12 @@ Heal_Bot_GUI:
 	
 	Gui Add, Text, x48 y608 w100 h23 +0x200, Y Coord Location:
 	Gui Add, Edit, x155 y608 w56 h21 vY_HP_Character_5, % Y_HP_Character_5
-	;Gui Add, Button, x48 y632 w80 h23, Save
+	
+	Gui Add, Text, x48 y632 w100 h23 +0x200, Primary Heal:
+	Gui Add, hotkey, x130 y632 w90 h21 vPrimary_Heal_5, % Primary_Heal_5
+	
+	Gui Add, Text, x224 y632 w100 h23 +0x200, Secondary Heal:
+	Gui Add, hotkey, x320 y632 w90 h21 vSecondary_Heal_5, % Secondary_Heal_5
 	
 	Gui Add, Text, x224 y560 w163 h23 +0x200, Group Member 5 Health End
 	
@@ -191,7 +231,7 @@ Heal_Bot_GUI:
 	Gui Add, Edit, x305 y584 w56 h21 v100_x_HP_Character_5, % 100_x_HP_Character_5
 	
 	Gui Add, Text, x224 y608 w85 h23 +0x200, HP Color:
-	Gui Add, Edit, x305 y608 w56 h21 vHP_color_character_5, % HP_color_character_5
+	Gui Add, Edit, x305 y608 w70 h21 vHP_color_character_5, % HP_color_character_5
 ;~~~~~~~~~~~~~~~~~~~~~~~~ Group Member 6 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	gui, font, underline
 	Gui Add, Text, x48 y664 w200 h23 +0x200, Group Member 6 Health Monitor
@@ -209,13 +249,19 @@ Heal_Bot_GUI:
 	Gui Add, Edit, x155 y736 w56 h21 vY_HP_Character_6, % Y_HP_Character_6
 	;Gui Add, Button, x48 y760 w80 h23, Save
 	
+	Gui Add, Text, x48 y760 w100 h23 +0x200, Primary Heal:
+	Gui Add, hotkey, x130 y760 w90 h21 vPrimary_Heal_6, % Primary_Heal_6
+	
+	Gui Add, Text, x224 y760 w100 h23 +0x200, Secondary Heal:
+	Gui Add, hotkey, x320 y760 w90 h21 vSecondary_Heal_6, % Secondary_Heal_6
+	
 	Gui Add, Text, x224 y688 w163 h23 +0x200, Group Member 6 Health End
 	
 	Gui Add, Text, x224 y712 w85 h23 +0x200, X Coord End:
 	Gui Add, Edit, x305 y712 w56 h21 v100_x_HP_Character_6, % 100_x_HP_Character_6
 	
 	Gui Add, Text, x224 y736 w85 h23 +0x200, HP Color:
-	Gui Add, Edit, x305 y736 w56 h21 vHP_color_character_6, % HP_color_character_6
+	Gui Add, Edit, x305 y736 w70 h21 vHP_color_character_6, % HP_color_character_6
 ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	Gui Add, Text, x424 y8 w180 h23 +0x200, When to heal. EXCEPT 48-52`%
 	
@@ -300,6 +346,12 @@ GUISave:
 		iniwrite,% Heal_Button, %inifile%, Heal Bot Monitor, Heal Button
 		
 		iniwrite,% Primary_Client, %inifile%, Heal Bot Monitor, Primary Client
+		
+		iniwrite,% Primary_Heal_%a_index%, %inifile%, Group HP Monitor, Group Member %a_index% Primary Heal
+		Primary_Heal[a_index] := Primary_Heal_%a_index%
+		
+		iniwrite,% Secondary_Heal_%a_index%, %inifile%, Group HP Monitor, Group Member %a_index% Secondary Heal
+		Secondary_Heal[a_index] := Secondary_Heal_%a_index%
 	}
 	return
 }
@@ -339,101 +391,143 @@ gui, show
 
 return
 
-Health_Monitor(100_x_HP_Character, 0_x_HP_Character, Y_HP_Character, HP_color_character, heal_at_Percent, HP_Monitor_State, Heal_Bot_State, Heal_Button, Healer_PID)
+Health_Monitor(100_x_HP_Character, 0_x_HP_Character, Y_HP_Character, HP_color_character, heal_at_Percent, HP_Monitor_State, Heal_Bot_State, Heal_Button, Healer_PID, Primary_Heal, Primary_Client)
 {
+	
 	if HP_Monitor_State[1] = 1
 	{	
 		Monitor_Health_1 := (((100_x_HP_Character[1] - 0_x_HP_Character[1]) / 100 * heal_at_Percent[1]) + 0_x_HP_Character[1])
-		PixelGetColor, Current_Health_1, Monitor_Health_1, Y_HP_Character[1], RGB
-		if (Current_Health_1 = HP_color_character[1]) ; verifying pixel grabbed is same as hp bar red
+		ifwinactive, %Primary_Client%
 		{
-			sleep -1
+			PixelGetColor, Current_Health_1, Monitor_Health_1, Y_HP_Character[1], RGB slow
+			if (Current_Health_1 = HP_color_character[1]) ; verifying pixel grabbed is same as hp bar red
+			{
+				sleep, -1
+			}
+			else
+			{
+				controlsend,, % Primary_Heal[1], %Healer_PID% ; pixel grabbed is not red meaning health is lost
+				sleep, 350 ; 3.5 seconds
+			}
 		}
 		else
 		{
-			controlsend,, %Heal_Button%, %Healer_PID% ; pixel grabbed is not red meaning health is lost
-			sleep, 350 ; 3.5 seconds
+			return
 		}
 	}
 	
 	if HP_Monitor_State[2] = 1
 	{	
 		Monitor_Health_2 := (((100_x_HP_Character[2] - 0_x_HP_Character[2]) / 100 * heal_at_Percent[2]) + 0_x_HP_Character[2])
-		PixelGetColor, Current_Health_2, Monitor_Health_2, Y_HP_Character[2], RGB
-		if (Current_Health_2 = HP_color_character[2]) ; verifying pixel grabbed is same as hp bar red
-		{
-			msgbox, do nothing 2 ;	nothing
-			sleep -1
+		ifwinactive, %Primary_Client%
+		{	
+			PixelGetColor, Current_Health_2, Monitor_Health_2, Y_HP_Character[2], RGB slow
+			if (Current_Health_2 = HP_color_character[2]) ; verifying pixel grabbed is same as hp bar red
+			{
+				sleep, -1
+			}
+			else
+			{
+				controlsend,, % Primary_Heal[2], %Healer_PID% ; pixel grabbed is not red meaning health is lost
+				sleep, 350 ; 3.5 seconds
+			}
 		}
 		else
 		{
-			msgbox, do something 2 ;	controlsend,, 1, ahk_pid 85132 ; pixel grabbed is not red meaning health is lost
-			sleep, 350 ; 3.5 seconds
+			return
 		}
 	}
 	
 	if HP_Monitor_State[3] = 1
 	{	
 		Monitor_Health_3 := (((100_x_HP_Character[3] - 0_x_HP_Character[3]) / 100 * heal_at_Percent[3]) + 0_x_HP_Character[3])
-		PixelGetColor, Current_Health_3, Monitor_Health_3, Y_HP_Character[3], RGB
-		if (Current_Health_3 = HP_color_character[3]) ; verifying pixel grabbed is same as hp bar red
-		{
-			msgbox, do nothing 3 ;	nothing						sleep -1
-			sleep -1
+		ifwinactive, %Primary_Client%
+		{	
+			PixelGetColor, Current_Health_3, Monitor_Health_3, Y_HP_Character[3], RGB
+			if (Current_Health_3 = HP_color_character[3]) ; verifying pixel grabbed is same as hp bar red
+			{
+				sleep -1
+			}
+			else
+			{
+				controlsend,, % Primary_Heal[3], %Healer_PID% ; pixel grabbed is not red meaning health is lost
+				sleep, 350 ; 3.5 seconds
+			}	
 		}
 		else
 		{
-			msgbox, do something 3 ;	controlsend,, 1, ahk_pid 85132 ; pixel grabbed is not red meaning health is lost
-			sleep, 350 ; 3.5 seconds
-		}	
+			return
+		}
 	}
 	
 	if HP_Monitor_State[4] = 1
 	{	
 		Monitor_Health_4 := (((100_x_HP_Character[4] - 0_x_HP_Character[4]) / 100 * heal_at_Percent[4]) + 0_x_HP_Character[4])
-		PixelGetColor, Current_Health_4, Monitor_Health_4, Y_HP_Character[4], RGB
-		if (Current_Health_4 = HP_color_character[4]) ; verifying pixel grabbed is same as hp bar red
+		ifwinactive, %Primary_Client%
 		{
-			msgbox, do nothing 4 ;	nothing						sleep -1
-			sleep -1
+			PixelGetColor, Current_Health_4, Monitor_Health_4, Y_HP_Character[4], RGB
+			if (Current_Health_4 = HP_color_character[4]) ; verifying pixel grabbed is same as hp bar red
+			{
+			;msgbox, do nothing 4 ;	nothing						sleep -1
+				sleep -1
+			}
+			else
+			{
+				controlsend,, % Primary_Heal[4], %Healer_PID% ; pixel grabbed is not red meaning health is lost
+				sleep, 350 ; 3.5 seconds
+			}	
 		}
 		else
 		{
-			msgbox, do something 4 ;	controlsend,, 1, ahk_pid 85132 ; pixel grabbed is not red meaning health is lost
-			sleep, 350 ; 3.5 seconds
-		}	
+			return
+		}
 	}
 	
 	if HP_Monitor_State[5] = 1
 	{	
 		Monitor_Health_5 := (((100_x_HP_Character[5] - 0_x_HP_Character[5]) / 100 * heal_at_Percent[5]) + 0_x_HP_Character[5])
-		PixelGetColor, Current_Health_5, Monitor_Health_5, Y_HP_Character[5], RGB
-		if (Current_Health_5 = HP_color_character[5]) ; verifying pixel grabbed is same as hp bar red
-		{
-			msgbox, do nothing 5 ;	nothing						sleep -1
-			sleep -1
+		ifwinactive, %Primary_Client%
+		{	
+			PixelGetColor, Current_Health_5, Monitor_Health_5, Y_HP_Character[5], RGB
+			if (Current_Health_5 = HP_color_character[5]) ; verifying pixel grabbed is same as hp bar red
+			{
+			;msgbox, do nothing 5 ;	nothing						sleep -1
+				sleep -1
+			}
+			else
+			{
+				controlsend,, % Primary_Heal[5], %Healer_PID% ; pixel grabbed is not red meaning health is lost
+				sleep, 350 ; 3.5 seconds
+			}
 		}
 		else
 		{
-			msgbox, do something 5 ;	controlsend,, 1, ahk_pid 85132 ; pixel grabbed is not red meaning health is lost
-			sleep, 350 ; 3.5 seconds
+			return
 		}
 	}
 	
 	if HP_Monitor_State[6] = 1
 	{	
 		Monitor_Health_6 := (((100_x_HP_Character[6] - 0_x_HP_Character[6]) / 100 * heal_at_Percent[6]) + 0_x_HP_Character[6])
-		PixelGetColor, Current_Health_6, Monitor_Health, Y_HP_Character[6], RGB
+		ifwinactive, %Primary_Client%
+		{
+		PixelGetColor, Current_Health_6, Monitor_Health_6, Y_HP_Character[6], RGB
 		if (Current_Health_6 = HP_color_character[6]) ; verifying pixel grabbed is same as hp bar red
 		{
-			msgbox, do nothing 6 ;	nothing						sleep -1
+			;msgbox, do nothing 6 ;	nothing						sleep -1
 			sleep -1
 		}
 		else
 		{
-			msgbox, do something 6 ;	controlsend,, 1, ahk_pid 85132 ; pixel grabbed is not red meaning health is lost
+			controlsend,, % Primary_Heal[6], %Healer_PID% ; pixel grabbed is not red meaning health is lost
 			sleep, 350 ; 3.5 seconds
 		}	
+		}
+		else
+		{
+			return
+		}
 	}
+	endfunction:
 	return
 }
