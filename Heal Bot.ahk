@@ -421,15 +421,6 @@ KeyCheck:    ; Prevents the HotKey box from accepting any combination of the Ctr
 	reload
 }
 
-^f2::
-{
-	;tester := (shift_state[1] = ctrl_state[1])
-	;Ctrl_Key_function(key, Healer_PID, delay)
-	;return
-;msgbox, % tester Shift_state[1] ctrl_state[1]
-;return
-}
-
 return
 
 Health_Monitor(100_x_HP_Character, 0_x_HP_Character, Y_HP_Character, HP_color_character, heal_at_Percent, HP_Monitor_State, Heal_Bot_State, Heal_Button, Healer_PID, Primary_Heal, Primary_Client, Delay, ctrl_state, Alt_State, Shift_State, Alt_Ctrl_State)
