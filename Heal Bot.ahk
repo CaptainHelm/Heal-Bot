@@ -8,17 +8,15 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
 IniFile := "Configuration.ini"
 
-HP_Monitor_State := [0, 0, 0, 0, 0, 0] ; group members
-0_x_HP_Character := [0, 0, 0, 0, 0, 0] ; hp bar start
-100_x_HP_Character := [0, 0, 0, 0, 0, 0] ; hp bar end
-Y_HP_Character := [0, 0, 0, 0, 0, 0] ; Yloc of HP bar
-HP_color_character := [0, 0, 0, 0, 0, 0] ; HP bar color RGB format
-heal_at_Percent := [0, 0, 0, 0, 0, 0] ; percentage to heal
-check_box_state :=[0, 0, 0, 0, 0, 0]
-Primary_Heal := [0, 0, 0, 0, 0, 0] 
-Secondary_Heal := [0, 0, 0, 0, 0, 0] ;need to add toggle functionality or priority not sure yet
-Delay := 3000
-key := 1
+HP_Monitor_State := [] ; group members
+0_x_HP_Character := [] ; hp bar start
+100_x_HP_Character := [] ; hp bar end
+Y_HP_Character := [] ; Yloc of HP bar
+HP_color_character := [] ; HP bar color RGB format
+heal_at_Percent := [] ; percentage to heal
+check_box_state :=[]
+Primary_Heal := [] 
+Secondary_Heal := [] ;need to add toggle functionality or priority not sure yet
 Ctrl_State := []
 Alt_State := []
 Shift_State := []
@@ -26,7 +24,6 @@ Alt_Ctrl_State :=[]
 Shift_Ctrl_state := []
 Shift_Alt_state := []
 Shift_Alt_Ctrl := []
-
 
 IfExist, %IniFile%
 {
@@ -56,9 +53,9 @@ IfExist, %IniFile%
 			
 			iniread, Heal_Bot_State, %inifile%, Heal Bot Monitor, Enabled or Disabled
 			
-			iniread, Heal_Button, %inifile%, Heal Bot Monitor, Heal Button
-			
 			iniread, Primary_Client, %inifile%, Heal Bot Monitor, Primary Client
+			
+			iniread, Delay, %inifile%, Heal Bot Monitor, Delay
 			
 			iniread, Primary_Heal_%a_index%, %inifile%, Group HP Monitor, Group Member %a_index% Primary Heal
 			Primary_Heal[a_index] := Primary_Heal_%a_index%
@@ -113,7 +110,7 @@ Heal_Bot_GUI:
 	Gui Add, Edit, x155 y96 w56 h21 vY_HP_Character_1, % Y_HP_Character_1 ; Y start
 	
 	Gui Add, Text, x48 y120 w100 h23 +0x200, Primary Heal:
-	Gui Add, hotkey, x130 y120 w90 h21 vPrimary_Heal_1, % Primary_Heal_1
+	Gui Add, hotkey, x130 y120 w90 h21  gKeyCheck +Hwndprimary_heal_1_Hwnd vprimary_heal_1, % primary_heal_1
 	
 	Gui Add, checkbox, x224 y120 w45 h23 vCtrl_state_1 checked%Ctrl_state_1%, Ctrl
 	Gui Add, checkbox, x275 y120 w45 h23 vAlt_state_1 checked%Alt_state_1%, `Alt
@@ -141,10 +138,9 @@ Heal_Bot_GUI:
 	
 	Gui Add, Text, x48 y224 w100 h23 +0x200, Y Coord Location:
 	Gui Add, Edit, x155 y224 w56 h21 vY_HP_Character_2, % Y_HP_Character_2
-	;Gui Add, Button, x48 y248 w80 h23, Save
 	
 	Gui Add, Text, x48 y248 w100 h23 +0x200, Primary Heal:
-	Gui Add, hotkey, x130 y248 w90 h21 vPrimary_Heal_2, % Primary_Heal_2
+	Gui Add, hotkey, x130 y248 w90 h21 gKeyCheck +Hwndprimary_heal_2_Hwnd vprimary_heal_2, % Primary_Heal_2
 	
 	Gui Add, checkbox, x224 y248 w45 h23 vCtrl_state_2 checked%Ctrl_state_2%, Ctrl
 	Gui Add, checkbox, x275 y248 w45 h23 vAlt_state_2 checked%Alt_state_2%, `Alt
@@ -155,7 +151,7 @@ Heal_Bot_GUI:
 	Gui Add, Text, x224 y200 w85 h23 +0x200, X Coord End:
 	Gui Add, Edit, x305 y200 w56 h21 v100_x_HP_Character_2, % 100_x_HP_Character_2
 	
-	Gui Add, Text, x224 y224 w85 h23 +0x200, HP Color
+	Gui Add, Text, x224 y224 w85 h23 +0x200, HP Color:
 	Gui Add, Edit, x305 y224 w70 h21 vHP_color_character_2, % HP_color_character_2
 ;~~~~~~~~~~~~~~~~~~~~~~~~ Group Member 3 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	gui, font, underline 
@@ -172,10 +168,9 @@ Heal_Bot_GUI:
 	
 	Gui Add, Text, x48 y352 w100 h23 +0x200, Y Coord Location:
 	Gui Add, Edit, x155 y352 w56 h21 vY_HP_Character_3, % Y_HP_Character_3
-	;Gui Add, Button, x48 y376 w80 h23, Save
 	
 	Gui Add, Text, x48 y376 w100 h23 +0x200, Primary Heal:
-	Gui Add, hotkey, x130 y376 w90 h21 vPrimary_Heal_3, % Primary_Heal_3
+	Gui Add, hotkey, x130 y376 w90 h21 gKeyCheck +Hwndprimary_heal_3_Hwnd vprimary_heal_3, % Primary_Heal_3
 	
 	Gui Add, checkbox, x224 y376 w45 h23 vCtrl_state_3 checked%Ctrl_state_3%, Ctrl
 	Gui Add, checkbox, x275 y376 w45 h23 vAlt_state_3 checked%Alt_state_3%, `Alt
@@ -203,10 +198,9 @@ Heal_Bot_GUI:
 	
 	Gui Add, Text, x48 y480 w100 h23 +0x200, Y Coord Location:
 	Gui Add, Edit, x155 y480 w56 h21 vY_HP_Character_4, % Y_HP_Character_4
-	;Gui Add, Button, x48 y504 w80 h23, Save
 	
 	Gui Add, Text, x48 y504 w100 h23 +0x200, Primary Heal:
-	Gui Add, hotkey, x130 y504 w90 h21 vPrimary_Heal_4, % Primary_Heal_4
+	Gui Add, hotkey, x130 y504 w90 h21 gKeyCheck +Hwndprimary_heal_4_Hwnd vprimary_heal_4, % Primary_Heal_4
 	
 	Gui Add, checkbox, x224 y504 w45 h23 vCtrl_state_4 checked%Ctrl_state_4%, Ctrl
 	Gui Add, checkbox, x275 y504 w45 h23 vAlt_state_4 checked%Alt_state_4%, `Alt
@@ -236,7 +230,7 @@ Heal_Bot_GUI:
 	Gui Add, Edit, x155 y608 w56 h21 vY_HP_Character_5, % Y_HP_Character_5
 	
 	Gui Add, Text, x48 y632 w100 h23 +0x200, Primary Heal:
-	Gui Add, hotkey, x130 y632 w90 h21 vPrimary_Heal_5, % Primary_Heal_5
+	Gui Add, hotkey, x130 y632 w90 h21 gKeyCheck +Hwndprimary_heal_5_Hwnd vprimary_heal_5, % Primary_Heal_5
 	
 	Gui Add, checkbox, x224 y632 w45 h23 vCtrl_state_5 checked%Ctrl_state_5%, Ctrl
 	Gui Add, checkbox, x275 y632 w45 h23 vAlt_state_5 checked%Alt_state_5%, `Alt
@@ -264,10 +258,9 @@ Heal_Bot_GUI:
 	
 	Gui Add, Text, x48 y736 w100 h23 +0x200, Y Coord Location:
 	Gui Add, Edit, x155 y736 w56 h21 vY_HP_Character_6, % Y_HP_Character_6
-	;Gui Add, Button, x48 y760 w80 h23, Save
 	
 	Gui Add, Text, x48 y760 w100 h23 +0x200, Primary Heal:
-	Gui Add, hotkey, x130 y760 w90 h21 vPrimary_Heal_6, % Primary_Heal_6
+	Gui Add, hotkey, x130 y760 w90 h21 gKeyCheck +Hwndprimary_heal_6_Hwnd vprimary_heal_6, % Primary_Heal_6
 	
 	Gui Add, checkbox, x224 y760 w45 h23 vCtrl_state_6 checked%Ctrl_state_6%, Ctrl
 	Gui Add, checkbox, x275 y760 w45 h23 vAlt_state_6 checked%Alt_state_6%, `Alt
@@ -284,27 +277,27 @@ Heal_Bot_GUI:
 	Gui Add, Text, x424 y8 w180 h23 +0x200, When to heal. EXCEPT 48-52`% ; due to hp% text in the middle of the hp bar
 	
 	Gui Add, Text, x424 y48 w150 h23 +0x200, Group Member 1, Heal at:
-	Gui Add, edit, x575 y48 w25 h23 vheal_at_Percent_1, % heal_at_Percent_1 ; group member 1 80% health check
+	Gui Add, edit, x575 y48 w30 h23 vheal_at_Percent_1, % heal_at_Percent_1 ; group member 1 80% health check
 	Gui Add, Text, x605 y48 w20 h23 +0x200, `%
 	
 	Gui Add, Text, x424 y72 w150 h23 +0x200, Group Member 2, Heal at:
-	Gui Add, edit, x575 y72 w25 h23 vheal_at_Percent_2, % heal_at_Percent_2 ; group member 1 60% health check
+	Gui Add, edit, x575 y72 w30 h23 vheal_at_Percent_2, % heal_at_Percent_2 ; group member 1 60% health check
 	Gui Add, Text, x605 y72 w20 h23 +0x200, `%
 	
 	Gui Add, Text, x424 y96 w150 h23 +0x200, Group Member 3, Heal at:
-	Gui Add, edit, x575 y96 w25 h23 vheal_at_Percent_3, % heal_at_Percent_3 ; group member 1 40% health check
+	Gui Add, edit, x575 y96 w30 h23 vheal_at_Percent_3, % heal_at_Percent_3 ; group member 1 40% health check
 	Gui Add, Text, x605 y96 w20 h23 +0x200, `%
 	
 	Gui Add, Text, x424 y120 w150 h23 +0x200, Group Member 4, Heal at:
-	Gui Add, edit, x575 y120 w25 h23 vheal_at_Percent_4, % heal_at_Percent_4 ; group member 1 20% health check
+	Gui Add, edit, x575 y120 w30 h23 vheal_at_Percent_4, % heal_at_Percent_4 ; group member 1 20% health check
 	Gui Add, Text, x605 y120 w20 h23 +0x200, `%
 	
 	Gui Add, Text, x424 y144 w150 h23 +0x200, Group Member 5, Heal at:
-	Gui Add, edit, x575 y144 w25 h23 vheal_at_Percent_5, % heal_at_Percent_5 ; group member 1 20% health check
+	Gui Add, edit, x575 y144 w30 h23 vheal_at_Percent_5, % heal_at_Percent_5 ; group member 1 20% health check
 	Gui Add, Text, x605 y144 w20 h23 +0x200, `%
 	
 	Gui Add, Text, x424 y168 w150 h23 +0x200, Group Member 6, Heal at:
-	Gui Add, edit, x575 y168 w25 h23 vheal_at_Percent_6, % heal_at_Percent_6 ; group member 1 20% health check
+	Gui Add, edit, x575 y168 w30 h23 vheal_at_Percent_6, % heal_at_Percent_6 ; group member 1 20% health check
 	Gui Add, Text, x605 y168 w20 h23 +0x200, `%
 	
 	Gui Add, Text, x424 y264 w120 h23 +0x200, Ctrl F1 X Coord:
@@ -322,14 +315,14 @@ Heal_Bot_GUI:
 	Gui Add, Text, x424 y460 w145 h23 +0x200, Healer PID:
 	Gui Add, Edit, x500 y460 w161 h21 vhealer_PID, % healer_PID
 	
-	Gui Add, Text, x424 y484 w145 h23 +0x200, Heal Button:
-	Gui Add, hotkey, x500 y484 w161 h21 vHeal_Button, % Heal_Button
+	Gui Add, Text, x424 y484 w145 h23 +0x200, Spell Delay
+	Gui Add, edit, x500 y484 w161 h21 vDelay, % Delay
 ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~	
 	Gui Add, checkbox, x48 y896 w150 h25 vHeal_Bot_State Checked%Heal_Bot_State%, Heal monitor On | Off
 	Gui Add, Button, x48 y944 w80 h23 gGuiSave, Apply
 	Gui Add, Button, x136 y944 w80 h23 gGuiClose, Close
 	
-	Gui Show, w889 h989, Window
+	Gui Show, w700 h989, Window
 	Return
 }
 
@@ -365,6 +358,8 @@ GUISave:
 		
 		iniwrite,% Primary_Client, %inifile%, Heal Bot Monitor, Primary Client
 		
+		iniwrite,% Delay, %inifile%, Heal Bot Monitor, Delay
+		
 		iniwrite,% Primary_Heal_%a_index%, %inifile%, Group HP Monitor, Group Member %a_index% Primary Heal
 		Primary_Heal[a_index] := Primary_Heal_%a_index%
 		
@@ -394,6 +389,17 @@ GuiClose:
 	reload
 }
 
+KeyCheck:    ; Prevents the HotKey box from accepting any combination of the Ctrl, Alt, and Shift keys.
+{
+	loop 6
+	{		
+		Gui, Submit, NoHide
+		primary_heal_%a_index% := RegExReplace(primary_heal_%a_index%, "[!^+]*(.*)", "$1")
+		GuiControl, , % primary_heal_%a_index%_Hwnd, % primary_heal_%a_index%
+	}
+	Return
+}
+
 ^!t::
 {
 	gui, destroy
@@ -407,8 +413,6 @@ GuiClose:
 	MouseGetPos, x_mouse_position_hotkey, y_mouse_position_hotkey
 	PixelGetColor, getcolor, %x_mouse_position_hotkey%, %y_mouse_position_hotkey%, RGB
 	gosub Heal_Bot_GUI
-	;gui, show
-	;msgbox, X %x_mouse_position_hotkey% Y %y_mouse_position_hotkey% color %thiscolor%
 	return
 }
 
@@ -446,31 +450,31 @@ Health_Monitor(100_x_HP_Character, 0_x_HP_Character, Y_HP_Character, HP_color_ch
 			}
 			else if (Ctrl_state[1] = 1) and (alt_state[1] = 0) and (shift_state[1] = 0)
 			{
-				Ctrl_Key_function(Primary_Heal_1, Healer_PID, delay)
+				Ctrl_Key_function(Primary_Heal[1], Healer_PID, delay)
 			}
 			else if (Alt_state[1] = 1) and (Ctrl_state[1] = 0) and (shift_state[1] = 0)
 			{			
-				Alt_Key_function(Primary_Heal_1, Healer_PID, delay)
+				Alt_Key_function(Primary_Heal[1], Healer_PID, delay)
 			}
 			else if (shift_state[1] = 1) and (Ctrl_state[1] = 0) and (alt_state[1] = 0)
 			{
-				Shift_Key_function(Primary_Heal_1, Healer_PID, delay)
+				Shift_Key_function(Primary_Heal[1], Healer_PID, delay)
 			}
 			else if (alt_state[1] = 1) and (ctrl_state[1] = 1) and (shift_state[1] = 0)
 			{
-				Alt_Ctrl_Key_function(Primary_Heal_1, Healer_PID, delay)
+				Alt_Ctrl_Key_function(Primary_Heal[1], Healer_PID, delay)
 			}
 			else if (shift_state[1] = 1) and (Ctrl_state[1] = 1) and (alt_state[1] = 0)
 			{
-				Shift_Ctrl_Key_function(Primary_Heal_1, Healer_PID, delay)
+				Shift_Ctrl_Key_function(Primary_Heal[1], Healer_PID, delay)
 			}
 			else if (shift_state[1] = 1) and (alt_state[1] = 1) and (Ctrl_state[1] = 0)
 			{
-				Shift_Alt_Key_function(Primary_Heal_1, Healer_PID, delay)
+				Shift_Alt_Key_function(Primary_Heal[1], Healer_PID, delay)
 			}
 			else if (shift_state[1] = 1) and (alt_state[1] = 1) and (Ctrl_state[1] = 1)
 			{
-				Shift_Alt_Ctrl_Key_function(Primary_Heal_1, Healer_PID, delay)
+				Shift_Alt_Ctrl_Key_function(Primary_Heal[1], Healer_PID, delay)
 			}
 			else
 			{
@@ -495,31 +499,31 @@ Health_Monitor(100_x_HP_Character, 0_x_HP_Character, Y_HP_Character, HP_color_ch
 			}
 			else if (Ctrl_state[2] = 1) and (alt_state[2] = 0) and (shift_state[2] = 0)
 			{
-				Ctrl_Key_function(Primary_Heal_2, Healer_PID, delay)
+				Ctrl_Key_function(Primary_Heal[2], Healer_PID, delay)
 			}
 			else if (Alt_state[2] = 1) and (Ctrl_state[2] = 0) and (shift_state[2] = 0)
 			{			
-				Alt_Key_function(Primary_Heal_2, Healer_PID, delay)
+				Alt_Key_function(Primary_Heal[2], Healer_PID, delay)
 			}
 			else if (shift_state[2] = 1) and (Ctrl_state[2] = 0) and (alt_state[2] = 0)
 			{
-				Shift_Key_function(Primary_Heal_2, Healer_PID, delay)
+				Shift_Key_function(Primary_Heal[2], Healer_PID, delay)
 			}
 			else if (alt_state[2] = 1) and (ctrl_state[2] = 1) and (shift_state[2] = 0)
 			{
-				Alt_Ctrl_Key_function(Primary_Heal_2, Healer_PID, delay)
+				Alt_Ctrl_Key_function(Primary_Heal[2], Healer_PID, delay)
 			}
 			else if (shift_state[2] = 1) and (Ctrl_state[2] = 1) and (alt_state[2] = 0)
 			{
-				Shift_Ctrl_Key_function(Primary_Heal_2, Healer_PID, delay)
+				Shift_Ctrl_Key_function(Primary_Heal[2], Healer_PID, delay)
 			}
 			else if (shift_state[2] = 1) and (alt_state[2] = 1) and (Ctrl_state[2] = 0)
 			{
-				Shift_Alt_Key_function(Primary_Heal_2, Healer_PID, delay)
+				Shift_Alt_Key_function(Primary_Heal[2], Healer_PID, delay)
 			}
 			else if (shift_state[2] = 1) and (alt_state[2] = 1) and (Ctrl_state[2] = 1)
 			{
-				Shift_Alt_Ctrl_Key_function(Primary_Heal_2, Healer_PID, delay)
+				Shift_Alt_Ctrl_Key_function(Primary_Heal[2], Healer_PID, delay)
 			}
 			else
 			{
@@ -544,23 +548,23 @@ Health_Monitor(100_x_HP_Character, 0_x_HP_Character, Y_HP_Character, HP_color_ch
 			}
 			else if (Ctrl_state[3] = 1) and (alt_state[3] = 0) and (shift_state[3] = 0)
 			{
-				Ctrl_Key_function(Primary_Heal_3, Healer_PID, delay)
+				Ctrl_Key_function(Primary_Heal[3], Healer_PID, delay)
 			}
 			else if (Alt_state[3] = 1) and (Ctrl_state[3] = 0) and (shift_state[3] = 0)
 			{			
-				Alt_Key_function(Primary_Heal_3, Healer_PID, delay)
+				Alt_Key_function(Primary_Heal[3], Healer_PID, delay)
 			}
 			else if (shift_state[3] = 1) and (Ctrl_state[3] = 0) and (alt_state[3] = 0)
 			{
-				Shift_Key_function(Primary_Heal_3, Healer_PID, delay)
+				Shift_Key_function(Primary_Heal[3], Healer_PID, delay)
 			}
 			else if (alt_state[3] = 1) and (ctrl_state[3] = 1) and (shift_state[3] = 0)
 			{
-				Alt_Ctrl_Key_function(Primary_Heal_3, Healer_PID, delay)
+				Alt_Ctrl_Key_function(Primary_Heal[3], Healer_PID, delay)
 			}
 			else if (shift_state[3] = 1) and (Ctrl_state[3] = 1) and (alt_state[3] = 0)
 			{
-				Shift_Ctrl_Key_function(Primary_Heal_3, Healer_PID, delay)
+				Shift_Ctrl_Key_function(Primary_Heal[3], Healer_PID, delay)
 			}
 			else if (shift_state[3] = 1) and (alt_state[3] = 1) and (Ctrl_state[3] = 0)
 			{
@@ -568,7 +572,7 @@ Health_Monitor(100_x_HP_Character, 0_x_HP_Character, Y_HP_Character, HP_color_ch
 			}
 			else if (shift_state[3] = 1) and (alt_state[3] = 1) and (Ctrl_state[3] = 1)
 			{
-				Shift_Alt_Ctrl_Key_function(Primary_Heal_3, Healer_PID, delay)
+				Shift_Alt_Ctrl_Key_function(Primary_Heal[3], Healer_PID, delay)
 			}
 			else
 			{
@@ -593,31 +597,31 @@ Health_Monitor(100_x_HP_Character, 0_x_HP_Character, Y_HP_Character, HP_color_ch
 			}
 			else if (Ctrl_state[4] = 1) and (alt_state[4] = 0) and (shift_state[4] = 0)
 			{
-				Ctrl_Key_function(Primary_Heal_4, Healer_PID, delay)
+				Ctrl_Key_function(Primary_Heal[4], Healer_PID, delay)
 			}
 			else if (Alt_state[4] = 1) and (Ctrl_state[4] = 0) and (shift_state[4] = 0)
 			{			
-				Alt_Key_function(Primary_Heal_4, Healer_PID, delay)
+				Alt_Key_function(Primary_Heal[4], Healer_PID, delay)
 			}
 			else if (shift_state[4] = 1) and (Ctrl_state[4] = 0) and (alt_state[4] = 0)
 			{
-				Shift_Key_function(Primary_Heal_4, Healer_PID, delay)
+				Shift_Key_function(Primary_Heal[4], Healer_PID, delay)
 			}
 			else if (alt_state[4] = 1) and (ctrl_state[4] = 1) and (shift_state[4] = 0)
 			{
-				Alt_Ctrl_Key_function(Primary_Heal_4, Healer_PID, delay)
+				Alt_Ctrl_Key_function(Primary_Heal[4], Healer_PID, delay)
 			}
 			else if (shift_state[4] = 1) and (Ctrl_state[4] = 1) and (alt_state[4] = 0)
 			{
-				Shift_Ctrl_Key_function(Primary_Heal_4, Healer_PID, delay)
+				Shift_Ctrl_Key_function(Primary_Heal[4], Healer_PID, delay)
 			}
 			else if (shift_state[4] = 1) and (alt_state[4] = 1) and (Ctrl_state[4] = 0)
 			{
-				Shift_Alt_Key_function(Primary_Heal_4, Healer_PID, delay)
+				Shift_Alt_Key_function(Primary_Heal[4], Healer_PID, delay)
 			}
 			else if (shift_state[4] = 1) and (alt_state[4] = 1) and (Ctrl_state[4] = 1)
 			{
-				Shift_Alt_Ctrl_Key_function(Primary_Heal_4, Healer_PID, delay)
+				Shift_Alt_Ctrl_Key_function(Primary_Heal[4], Healer_PID, delay)
 			}
 			else
 			{
@@ -643,31 +647,31 @@ Health_Monitor(100_x_HP_Character, 0_x_HP_Character, Y_HP_Character, HP_color_ch
 			}
 			else if (Ctrl_state[5] = 1) and (alt_state[5] = 0) and (shift_state[5] = 0)
 			{
-				Ctrl_Key_function(Primary_Heal_5, Healer_PID, delay)
+				Ctrl_Key_function(Primary_Heal[5], Healer_PID, delay)
 			}
 			else if (Alt_state[5] = 1) and (Ctrl_state[5] = 0) and (shift_state[5] = 0)
 			{			
-				Alt_Key_function(Primary_Heal_5, Healer_PID, delay)
+				Alt_Key_function(Primary_Heal[5], Healer_PID, delay)
 			}
 			else if (shift_state[5] = 1) and (Ctrl_state[5] = 0) and (alt_state[5] = 0)
 			{
-				Shift_Key_function(Primary_Heal_5, Healer_PID, delay)
+				Shift_Key_function(Primary_Heal[5], Healer_PID, delay)
 			}
 			else if (alt_state[5] = 1) and (ctrl_state[5] = 1) and (shift_state[5] = 0)
 			{
-				Alt_Ctrl_Key_function(Primary_Heal_5, Healer_PID, delay)
+				Alt_Ctrl_Key_function(Primary_Heal[5], Healer_PID, delay)
 			}
 			else if (shift_state[5] = 1) and (Ctrl_state[5] = 1) and (alt_state[5] = 0)
 			{
-				Shift_Ctrl_Key_function(Primary_Heal_5, Healer_PID, delay)
+				Shift_Ctrl_Key_function(Primary_Heal[5], Healer_PID, delay)
 			}
 			else if (shift_state[5] = 1) and (alt_state[5] = 1) and (Ctrl_state[5] = 0)
 			{
-				Shift_Alt_Key_function(Primary_Heal_5, Healer_PID, delay)
+				Shift_Alt_Key_function(Primary_Heal[5], Healer_PID, delay)
 			}
 			else if (shift_state[5] = 1) and (alt_state[5] = 1) and (Ctrl_state[5] = 1)
 			{
-				Shift_Alt_Ctrl_Key_function(Primary_Heal_5, Healer_PID, delay)
+				Shift_Alt_Ctrl_Key_function(Primary_Heal[5], Healer_PID, delay)
 			}
 			else
 			{
@@ -692,31 +696,31 @@ Health_Monitor(100_x_HP_Character, 0_x_HP_Character, Y_HP_Character, HP_color_ch
 			}
 			else if (Ctrl_state[6] = 1) and (alt_state[6] = 0) and (shift_state[6] = 0)
 			{
-				Ctrl_Key_function(Primary_Heal_6, Healer_PID, delay)
+				Ctrl_Key_function(Primary_Heal[6], Healer_PID, delay)
 			}
 			else if (Alt_state[6] = 1) and (Ctrl_state[6] = 0) and (shift_state[6] = 0)
 			{			
-				Alt_Key_function(Primary_Heal_6, Healer_PID, delay)
+				Alt_Key_function(Primary_Heal[6], Healer_PID, delay)
 			}
 			else if (shift_state[6] = 1) and (Ctrl_state[6] = 0) and (alt_state[6] = 0)
 			{
-				Shift_Key_function(Primary_Heal_6, Healer_PID, delay)
+				Shift_Key_function(Primary_Heal[6], Healer_PID, delay)
 			}
 			else if (alt_state[6] = 1) and (ctrl_state[6] = 1) and (shift_state[6] = 0)
 			{
-				Alt_Ctrl_Key_function(Primary_Heal_6, Healer_PID, delay)
+				Alt_Ctrl_Key_function(Primary_Heal[6], Healer_PID, delay)
 			}
 			else if (shift_state[6] = 1) and (Ctrl_state[6] = 1) and (alt_state[6] = 0)
 			{
-				Shift_Ctrl_Key_function(Primary_Heal_6, Healer_PID, delay)
+				Shift_Ctrl_Key_function(Primary_Heal[6], Healer_PID, delay)
 			}
 			else if (shift_state[6] = 1) and (alt_state[6] = 1) and (Ctrl_state[6] = 0)
 			{
-				Shift_Alt_Key_function(Primary_Heal_6, Healer_PID, delay)
+				Shift_Alt_Key_function(Primary_Heal[6], Healer_PID, delay)
 			}
 			else if (shift_state[6] = 1) and (alt_state[6] = 1) and (Ctrl_state[6] = 1)
 			{
-				Shift_Alt_Ctrl_Key_function(Primary_Heal_6, Healer_PID, delay)
+				Shift_Alt_Ctrl_Key_function(Primary_Heal[6], Healer_PID, delay)
 			}
 			else
 			{
