@@ -69,10 +69,10 @@ IfExist, %IniFile%
 			iniread, Ctrl_state_%a_Index%, %inifile%, Group HP Monitor, Group Member %a_index% Ctrl Modifier
 			Ctrl_state[a_index] := Ctrl_state_%a_Index%
 			
-			iniread, Alt_state_%a_Index%, %inifile%, Group HP Monitor, Group Member %a_index% Alt Modifier
+			iniread, Alt_state_%a_Index%, %inifile%, Group HP Monitor, Group Member %a_index% `Alt Modifier
 			Alt_state[a_index] := Alt_state_%a_Index%
 			
-			iniread, Shift_state_%a_Index%, %inifile%, Group HP Monitor, Group Member %a_index% Shift Modifier
+			iniread, Shift_state_%a_Index%, %inifile%, Group HP Monitor, Group Member %a_index% `Shift Modifier
 			Shift_state[a_index] := Shift_state_%a_Index%
 		}
 		IfWinActive, %Primary_Client%
@@ -374,10 +374,10 @@ GUISave:
 		iniwrite,% Ctrl_state_%a_Index%, %inifile%, Group HP Monitor, Group Member %a_index% Ctrl Modifier
 		Ctrl_state[a_index] := Ctrl_state_%a_Index%
 		
-		iniwrite,% Alt_state_%a_Index%, %inifile%, Group HP Monitor, Group Member %a_index% Alt Modifier
+		iniwrite,% Alt_state_%a_Index%, %inifile%, Group HP Monitor, Group Member %a_index% `Alt Modifier
 		Alt_state[a_index] := Alt_state_%a_Index%
 		
-		iniwrite,% Shift_state_%a_Index%, %inifile%, Group HP Monitor, Group Member %a_index% Shift Modifier
+		iniwrite,% Shift_state_%a_Index%, %inifile%, Group HP Monitor, Group Member %a_index% `Shift Modifier
 		Shift_state[a_index] := Shift_state_%a_Index%
 	}
 	return
