@@ -8,22 +8,28 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
 IniFile := "Configuration.ini"
 
-;Heal_Bot_State := 0
-HP_Monitor_State := [] ; group members
-0_x_HP_Character := [1256, 1187, 1187, 1187, 1187, 1187] ; hp bar start
-100_x_HP_Character := [1659, 1659, 1659, 1659, 1659, 1659] ; hp bar end
-Y_HP_Character := [1149, 1473, 1473, 1473, 1473, 1473] ; Yloc of HP bar
-HP_color_character := [0xD90000, 0xD90000, 0xD90000, 0xD90000, 0xD90000, 0xD90000] ; HP bar color RGB format
-heal_at_Percent := [90, 90, 90, 90, 90, 90] ; percentage to heal
-check_box_state :=[]
-Healer_PID := 0
-Primary_Client := 0
-Primary_Heal := [0, 0, 0, 0, 0, 0]
-Secondary_Heal := [0, 0, 0, 0, 0, 0] ;need to add toggle functionality or priority
+HP_Monitor_State := [0, 0, 0, 0, 0, 0] ; group members
+0_x_HP_Character := [0, 0, 0, 0, 0, 0] ; hp bar start
+100_x_HP_Character := [0, 0, 0, 0, 0, 0] ; hp bar end
+Y_HP_Character := [0, 0, 0, 0, 0, 0] ; Yloc of HP bar
+HP_color_character := [0, 0, 0, 0, 0, 0] ; HP bar color RGB format
+heal_at_Percent := [0, 0, 0, 0, 0, 0] ; percentage to heal
+check_box_state :=[0, 0, 0, 0, 0, 0]
+Primary_Heal := [0, 0, 0, 0, 0, 0] 
+Secondary_Heal := [0, 0, 0, 0, 0, 0] ;need to add toggle functionality or priority not sure yet
+Delay := 3000
+key := 1
+Ctrl_State := []
+Alt_State := []
+Shift_State := []
+Alt_Ctrl_State :=[]
+Shift_Ctrl_state := []
+Shift_Alt_state := []
+Shift_Alt_Ctrl := []
+
 
 IfExist, %IniFile%
 {
-	sleep, 100
 	loop 
 	{
 		loop, 6
@@ -60,6 +66,14 @@ IfExist, %IniFile%
 			iniread, Secondary_Heal_%a_index%, %inifile%, Group HP Monitor, Group Member %a_index% Secondary Heal
 			Secondary_Heal[a_index] := Secondary_Heal_%a_index%
 			
+			iniread, Ctrl_state_%a_Index%, %inifile%, Group HP Monitor, Group Member %a_index% Ctrl Modifier
+			Ctrl_state[a_index] := Ctrl_state_%a_Index%
+			
+			iniread, Alt_state_%a_Index%, %inifile%, Group HP Monitor, Group Member %a_index% Alt Modifier
+			Alt_state[a_index] := Alt_state_%a_Index%
+			
+			iniread, Shift_state_%a_Index%, %inifile%, Group HP Monitor, Group Member %a_index% Shift Modifier
+			Shift_state[a_index] := Shift_state_%a_Index%
 		}
 		IfWinActive, %Primary_Client%
 		{
@@ -69,8 +83,7 @@ IfExist, %IniFile%
 			}
 			else if Heal_Bot_State = 1
 			{
-				sleep 50
-				Health_Monitor(100_x_HP_Character, 0_x_HP_Character, Y_HP_Character, HP_color_character, heal_at_Percent, HP_Monitor_State, Heal_Bot_State, Heal_Button, Healer_PID, Primary_Heal, Primary_Client)
+				Health_Monitor(100_x_HP_Character, 0_x_HP_Character, Y_HP_Character, HP_color_character, heal_at_Percent, HP_Monitor_State, Heal_Bot_State, Heal_Button, Healer_PID, Primary_Heal, Primary_Client, Delay, ctrl_state, Alt_State, Shift_State, Alt_Ctrl_State)
 			}
 			else
 			{
@@ -102,8 +115,9 @@ Heal_Bot_GUI:
 	Gui Add, Text, x48 y120 w100 h23 +0x200, Primary Heal:
 	Gui Add, hotkey, x130 y120 w90 h21 vPrimary_Heal_1, % Primary_Heal_1
 	
-	Gui Add, Text, x224 y120 w100 h23 +0x200, Secondary Heal:
-	Gui Add, hotkey, x320 y120 w90 h21 vSecondary_Heal_1, % Secondary_Heal_1
+	Gui Add, checkbox, x224 y120 w45 h23 vCtrl_state_1 checked%Ctrl_state_1%, Ctrl
+	Gui Add, checkbox, x275 y120 w45 h23 vAlt_state_1 checked%Alt_state_1%, `Alt
+	Gui Add, checkbox, x325 y120 w45 h23 VShift_state_1 checked%Shift_state_1%, `Shift
 	
 	Gui Add, Text, x224 y48 w163 h23 +0x200, Group Member 1 Health End
 	
@@ -132,8 +146,9 @@ Heal_Bot_GUI:
 	Gui Add, Text, x48 y248 w100 h23 +0x200, Primary Heal:
 	Gui Add, hotkey, x130 y248 w90 h21 vPrimary_Heal_2, % Primary_Heal_2
 	
-	Gui Add, Text, x224 y248 w100 h23 +0x200, Secondary Heal:
-	Gui Add, hotkey, x320 y248 w90 h21 vSecondary_Heal_2, % Secondary_Heal_2
+	Gui Add, checkbox, x224 y248 w45 h23 vCtrl_state_2 checked%Ctrl_state_2%, Ctrl
+	Gui Add, checkbox, x275 y248 w45 h23 vAlt_state_2 checked%Alt_state_2%, `Alt
+	Gui Add, checkbox, x325 y248 w45 h23 VShift_state_2 checked%Shift_state_2%, `Shift
 	
 	Gui Add, Text, x224 y176 w163 h23 +0x200, Group Member 2 Health End
 	
@@ -162,8 +177,9 @@ Heal_Bot_GUI:
 	Gui Add, Text, x48 y376 w100 h23 +0x200, Primary Heal:
 	Gui Add, hotkey, x130 y376 w90 h21 vPrimary_Heal_3, % Primary_Heal_3
 	
-	Gui Add, Text, x224 y376 w100 h23 +0x200, Secondary Heal:
-	Gui Add, hotkey, x320 y376 w90 h21 vSecondary_Heal_3, % Secondary_Heal_3
+	Gui Add, checkbox, x224 y376 w45 h23 vCtrl_state_3 checked%Ctrl_state_3%, Ctrl
+	Gui Add, checkbox, x275 y376 w45 h23 vAlt_state_3 checked%Alt_state_3%, `Alt
+	Gui Add, checkbox, x325 y376 w45 h23 VShift_state_3 checked%Shift_state_3%, `Shift
 	
 	Gui Add, Text, x224 y304 w163 h23 +0x200, Group Member 3 Health End
 	
@@ -172,7 +188,6 @@ Heal_Bot_GUI:
 	
 	Gui Add, Text, x224 y352 w85 h23 +0x200, HP Color:
 	Gui Add, Edit, x305 y352 w70 h21 vHP_color_character_3, % HP_color_character_3
-	;Gui Add, Button, x224 y376 w80 h23, Save
 ;~~~~~~~~~~~~~~~~~~~~~~~~ Group Member 4 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	gui, font, underline 
 	Gui Add, Text, x48 y408 w200 h23 +0x200, Group Member 4 Health Monitor
@@ -193,8 +208,9 @@ Heal_Bot_GUI:
 	Gui Add, Text, x48 y504 w100 h23 +0x200, Primary Heal:
 	Gui Add, hotkey, x130 y504 w90 h21 vPrimary_Heal_4, % Primary_Heal_4
 	
-	Gui Add, Text, x224 y504 w100 h23 +0x200, Secondary Heal:
-	Gui Add, hotkey, x320 y504 w90 h21 vSecondary_Heal_4, % Secondary_Heal_4
+	Gui Add, checkbox, x224 y504 w45 h23 vCtrl_state_4 checked%Ctrl_state_4%, Ctrl
+	Gui Add, checkbox, x275 y504 w45 h23 vAlt_state_4 checked%Alt_state_4%, `Alt
+	Gui Add, checkbox, x325 y504 w45 h23 VShift_state_4 checked%Shift_state_4%, `Shift
 	
 	Gui Add, Text, x224 y432 w163 h23 +0x200, Group Member 4 Health End
 	
@@ -222,8 +238,9 @@ Heal_Bot_GUI:
 	Gui Add, Text, x48 y632 w100 h23 +0x200, Primary Heal:
 	Gui Add, hotkey, x130 y632 w90 h21 vPrimary_Heal_5, % Primary_Heal_5
 	
-	Gui Add, Text, x224 y632 w100 h23 +0x200, Secondary Heal:
-	Gui Add, hotkey, x320 y632 w90 h21 vSecondary_Heal_5, % Secondary_Heal_5
+	Gui Add, checkbox, x224 y632 w45 h23 vCtrl_state_5 checked%Ctrl_state_5%, Ctrl
+	Gui Add, checkbox, x275 y632 w45 h23 vAlt_state_5 checked%Alt_state_5%, `Alt
+	Gui Add, checkbox, x325 y632 w45 h23 VShift_state_5 checked%Shift_state_5%, `Shift
 	
 	Gui Add, Text, x224 y560 w163 h23 +0x200, Group Member 5 Health End
 	
@@ -252,8 +269,9 @@ Heal_Bot_GUI:
 	Gui Add, Text, x48 y760 w100 h23 +0x200, Primary Heal:
 	Gui Add, hotkey, x130 y760 w90 h21 vPrimary_Heal_6, % Primary_Heal_6
 	
-	Gui Add, Text, x224 y760 w100 h23 +0x200, Secondary Heal:
-	Gui Add, hotkey, x320 y760 w90 h21 vSecondary_Heal_6, % Secondary_Heal_6
+	Gui Add, checkbox, x224 y760 w45 h23 vCtrl_state_6 checked%Ctrl_state_6%, Ctrl
+	Gui Add, checkbox, x275 y760 w45 h23 vAlt_state_6 checked%Alt_state_6%, `Alt
+	Gui Add, checkbox, x325 y760 w45 h23 VShift_state_6 checked%Shift_state_6%, `Shift
 	
 	Gui Add, Text, x224 y688 w163 h23 +0x200, Group Member 6 Health End
 	
@@ -263,7 +281,7 @@ Heal_Bot_GUI:
 	Gui Add, Text, x224 y736 w85 h23 +0x200, HP Color:
 	Gui Add, Edit, x305 y736 w70 h21 vHP_color_character_6, % HP_color_character_6
 ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	Gui Add, Text, x424 y8 w180 h23 +0x200, When to heal. EXCEPT 48-52`%
+	Gui Add, Text, x424 y8 w180 h23 +0x200, When to heal. EXCEPT 48-52`% ; due to hp% text in the middle of the hp bar
 	
 	Gui Add, Text, x424 y48 w150 h23 +0x200, Group Member 1, Heal at:
 	Gui Add, edit, x575 y48 w25 h23 vheal_at_Percent_1, % heal_at_Percent_1 ; group member 1 80% health check
@@ -352,6 +370,15 @@ GUISave:
 		
 		iniwrite,% Secondary_Heal_%a_index%, %inifile%, Group HP Monitor, Group Member %a_index% Secondary Heal
 		Secondary_Heal[a_index] := Secondary_Heal_%a_index%
+		
+		iniwrite,% Ctrl_state_%a_Index%, %inifile%, Group HP Monitor, Group Member %a_index% Ctrl Modifier
+		Ctrl_state[a_index] := Ctrl_state_%a_Index%
+		
+		iniwrite,% Alt_state_%a_Index%, %inifile%, Group HP Monitor, Group Member %a_index% Alt Modifier
+		Alt_state[a_index] := Alt_state_%a_Index%
+		
+		iniwrite,% Shift_state_%a_Index%, %inifile%, Group HP Monitor, Group Member %a_index% Shift Modifier
+		Shift_state[a_index] := Shift_state_%a_Index%
 	}
 	return
 }
@@ -376,10 +403,11 @@ GuiClose:
 
 ^f1::
 {
-	gui, hide
+	gui, destroy
 	MouseGetPos, x_mouse_position_hotkey, y_mouse_position_hotkey
 	PixelGetColor, getcolor, %x_mouse_position_hotkey%, %y_mouse_position_hotkey%, RGB
-gui, show
+	gosub Heal_Bot_GUI
+	;gui, show
 	;msgbox, X %x_mouse_position_hotkey% Y %y_mouse_position_hotkey% color %thiscolor%
 	return
 }
@@ -389,25 +417,65 @@ gui, show
 	reload
 }
 
+^f2::
+{
+	;tester := (shift_state[1] = ctrl_state[1])
+	;Ctrl_Key_function(key, Healer_PID, delay)
+	;return
+;msgbox, % tester Shift_state[1] ctrl_state[1]
+;return
+}
+
 return
 
-Health_Monitor(100_x_HP_Character, 0_x_HP_Character, Y_HP_Character, HP_color_character, heal_at_Percent, HP_Monitor_State, Heal_Bot_State, Heal_Button, Healer_PID, Primary_Heal, Primary_Client)
+Health_Monitor(100_x_HP_Character, 0_x_HP_Character, Y_HP_Character, HP_color_character, heal_at_Percent, HP_Monitor_State, Heal_Bot_State, Heal_Button, Healer_PID, Primary_Heal, Primary_Client, Delay, ctrl_state, Alt_State, Shift_State, Alt_Ctrl_State)
 {
+	loop 6
+	{
+		Monitor_Health_%a_index% := (((100_x_HP_Character[a_index] - 0_x_HP_Character[a_index]) / 100 * heal_at_Percent[a_index]) + 0_x_HP_Character[a_index]) ; runs the calculation of the % of hp to monitor and assigns it to the variable, Monitor_Health_%a_index%, every number the loop run is added as the a_index
+	}
 	
 	if HP_Monitor_State[1] = 1
 	{	
-		Monitor_Health_1 := (((100_x_HP_Character[1] - 0_x_HP_Character[1]) / 100 * heal_at_Percent[1]) + 0_x_HP_Character[1])
 		ifwinactive, %Primary_Client%
 		{
-			PixelGetColor, Current_Health_1, Monitor_Health_1, Y_HP_Character[1], RGB slow
+			PixelGetColor, Current_Health_1, Monitor_Health_1, Y_HP_Character[1], RGB
 			if (Current_Health_1 = HP_color_character[1]) ; verifying pixel grabbed is same as hp bar red
 			{
 				sleep, -1
 			}
+			else if (Ctrl_state[1] = 1) and (alt_state[1] = 0) and (shift_state[1] = 0)
+			{
+				Ctrl_Key_function(Primary_Heal_1, Healer_PID, delay)
+			}
+			else if (Alt_state[1] = 1) and (Ctrl_state[1] = 0) and (shift_state[1] = 0)
+			{			
+				Alt_Key_function(Primary_Heal_1, Healer_PID, delay)
+			}
+			else if (shift_state[1] = 1) and (Ctrl_state[1] = 0) and (alt_state[1] = 0)
+			{
+				Shift_Key_function(Primary_Heal_1, Healer_PID, delay)
+			}
+			else if (alt_state[1] = 1) and (ctrl_state[1] = 1) and (shift_state[1] = 0)
+			{
+				Alt_Ctrl_Key_function(Primary_Heal_1, Healer_PID, delay)
+			}
+			else if (shift_state[1] = 1) and (Ctrl_state[1] = 1) and (alt_state[1] = 0)
+			{
+				Shift_Ctrl_Key_function(Primary_Heal_1, Healer_PID, delay)
+			}
+			else if (shift_state[1] = 1) and (alt_state[1] = 1) and (Ctrl_state[1] = 0)
+			{
+				Shift_Alt_Key_function(Primary_Heal_1, Healer_PID, delay)
+			}
+			else if (shift_state[1] = 1) and (alt_state[1] = 1) and (Ctrl_state[1] = 1)
+			{
+				Shift_Alt_Ctrl_Key_function(Primary_Heal_1, Healer_PID, delay)
+			}
 			else
 			{
-				controlsend,, % Primary_Heal[1], %Healer_PID% ; pixel grabbed is not red meaning health is lost
-				sleep, 350 ; 3.5 seconds
+				controlsend,, % Primary_Heal[1], %Healer_PID% ; pixel grabbed is not red meaning health is lost ; WORKING
+				sleep, %delay%
 			}
 		}
 		else
@@ -418,18 +486,45 @@ Health_Monitor(100_x_HP_Character, 0_x_HP_Character, Y_HP_Character, HP_color_ch
 	
 	if HP_Monitor_State[2] = 1
 	{	
-		Monitor_Health_2 := (((100_x_HP_Character[2] - 0_x_HP_Character[2]) / 100 * heal_at_Percent[2]) + 0_x_HP_Character[2])
 		ifwinactive, %Primary_Client%
 		{	
-			PixelGetColor, Current_Health_2, Monitor_Health_2, Y_HP_Character[2], RGB slow
+			PixelGetColor, Current_Health_2, Monitor_Health_2, Y_HP_Character[2], RGB
 			if (Current_Health_2 = HP_color_character[2]) ; verifying pixel grabbed is same as hp bar red
 			{
 				sleep, -1
 			}
+			else if (Ctrl_state[2] = 1) and (alt_state[2] = 0) and (shift_state[2] = 0)
+			{
+				Ctrl_Key_function(Primary_Heal_2, Healer_PID, delay)
+			}
+			else if (Alt_state[2] = 1) and (Ctrl_state[2] = 0) and (shift_state[2] = 0)
+			{			
+				Alt_Key_function(Primary_Heal_2, Healer_PID, delay)
+			}
+			else if (shift_state[2] = 1) and (Ctrl_state[2] = 0) and (alt_state[2] = 0)
+			{
+				Shift_Key_function(Primary_Heal_2, Healer_PID, delay)
+			}
+			else if (alt_state[2] = 1) and (ctrl_state[2] = 1) and (shift_state[2] = 0)
+			{
+				Alt_Ctrl_Key_function(Primary_Heal_2, Healer_PID, delay)
+			}
+			else if (shift_state[2] = 1) and (Ctrl_state[2] = 1) and (alt_state[2] = 0)
+			{
+				Shift_Ctrl_Key_function(Primary_Heal_2, Healer_PID, delay)
+			}
+			else if (shift_state[2] = 1) and (alt_state[2] = 1) and (Ctrl_state[2] = 0)
+			{
+				Shift_Alt_Key_function(Primary_Heal_2, Healer_PID, delay)
+			}
+			else if (shift_state[2] = 1) and (alt_state[2] = 1) and (Ctrl_state[2] = 1)
+			{
+				Shift_Alt_Ctrl_Key_function(Primary_Heal_2, Healer_PID, delay)
+			}
 			else
 			{
 				controlsend,, % Primary_Heal[2], %Healer_PID% ; pixel grabbed is not red meaning health is lost
-				sleep, 350 ; 3.5 seconds
+				sleep, 2500 ; 3.5 seconds
 			}
 		}
 		else
@@ -440,7 +535,6 @@ Health_Monitor(100_x_HP_Character, 0_x_HP_Character, Y_HP_Character, HP_color_ch
 	
 	if HP_Monitor_State[3] = 1
 	{	
-		Monitor_Health_3 := (((100_x_HP_Character[3] - 0_x_HP_Character[3]) / 100 * heal_at_Percent[3]) + 0_x_HP_Character[3])
 		ifwinactive, %Primary_Client%
 		{	
 			PixelGetColor, Current_Health_3, Monitor_Health_3, Y_HP_Character[3], RGB
@@ -448,10 +542,38 @@ Health_Monitor(100_x_HP_Character, 0_x_HP_Character, Y_HP_Character, HP_color_ch
 			{
 				sleep -1
 			}
+			else if (Ctrl_state[3] = 1) and (alt_state[3] = 0) and (shift_state[3] = 0)
+			{
+				Ctrl_Key_function(Primary_Heal_3, Healer_PID, delay)
+			}
+			else if (Alt_state[3] = 1) and (Ctrl_state[3] = 0) and (shift_state[3] = 0)
+			{			
+				Alt_Key_function(Primary_Heal_3, Healer_PID, delay)
+			}
+			else if (shift_state[3] = 1) and (Ctrl_state[3] = 0) and (alt_state[3] = 0)
+			{
+				Shift_Key_function(Primary_Heal_3, Healer_PID, delay)
+			}
+			else if (alt_state[3] = 1) and (ctrl_state[3] = 1) and (shift_state[3] = 0)
+			{
+				Alt_Ctrl_Key_function(Primary_Heal_3, Healer_PID, delay)
+			}
+			else if (shift_state[3] = 1) and (Ctrl_state[3] = 1) and (alt_state[3] = 0)
+			{
+				Shift_Ctrl_Key_function(Primary_Heal_3, Healer_PID, delay)
+			}
+			else if (shift_state[3] = 1) and (alt_state[3] = 1) and (Ctrl_state[3] = 0)
+			{
+				Shift_Alt_Key_function(Primary_Heal_3, Healer_PID, delay)
+			}
+			else if (shift_state[3] = 1) and (alt_state[3] = 1) and (Ctrl_state[3] = 1)
+			{
+				Shift_Alt_Ctrl_Key_function(Primary_Heal_3, Healer_PID, delay)
+			}
 			else
 			{
 				controlsend,, % Primary_Heal[3], %Healer_PID% ; pixel grabbed is not red meaning health is lost
-				sleep, 350 ; 3.5 seconds
+				sleep, 2500 ; 3.5 seconds
 			}	
 		}
 		else
@@ -462,19 +584,45 @@ Health_Monitor(100_x_HP_Character, 0_x_HP_Character, Y_HP_Character, HP_color_ch
 	
 	if HP_Monitor_State[4] = 1
 	{	
-		Monitor_Health_4 := (((100_x_HP_Character[4] - 0_x_HP_Character[4]) / 100 * heal_at_Percent[4]) + 0_x_HP_Character[4])
 		ifwinactive, %Primary_Client%
 		{
 			PixelGetColor, Current_Health_4, Monitor_Health_4, Y_HP_Character[4], RGB
 			if (Current_Health_4 = HP_color_character[4]) ; verifying pixel grabbed is same as hp bar red
 			{
-			;msgbox, do nothing 4 ;	nothing						sleep -1
 				sleep -1
+			}
+			else if (Ctrl_state[4] = 1) and (alt_state[4] = 0) and (shift_state[4] = 0)
+			{
+				Ctrl_Key_function(Primary_Heal_4, Healer_PID, delay)
+			}
+			else if (Alt_state[4] = 1) and (Ctrl_state[4] = 0) and (shift_state[4] = 0)
+			{			
+				Alt_Key_function(Primary_Heal_4, Healer_PID, delay)
+			}
+			else if (shift_state[4] = 1) and (Ctrl_state[4] = 0) and (alt_state[4] = 0)
+			{
+				Shift_Key_function(Primary_Heal_4, Healer_PID, delay)
+			}
+			else if (alt_state[4] = 1) and (ctrl_state[4] = 1) and (shift_state[4] = 0)
+			{
+				Alt_Ctrl_Key_function(Primary_Heal_4, Healer_PID, delay)
+			}
+			else if (shift_state[4] = 1) and (Ctrl_state[4] = 1) and (alt_state[4] = 0)
+			{
+				Shift_Ctrl_Key_function(Primary_Heal_4, Healer_PID, delay)
+			}
+			else if (shift_state[4] = 1) and (alt_state[4] = 1) and (Ctrl_state[4] = 0)
+			{
+				Shift_Alt_Key_function(Primary_Heal_4, Healer_PID, delay)
+			}
+			else if (shift_state[4] = 1) and (alt_state[4] = 1) and (Ctrl_state[4] = 1)
+			{
+				Shift_Alt_Ctrl_Key_function(Primary_Heal_4, Healer_PID, delay)
 			}
 			else
 			{
 				controlsend,, % Primary_Heal[4], %Healer_PID% ; pixel grabbed is not red meaning health is lost
-				sleep, 350 ; 3.5 seconds
+				sleep, 2500 ; 3.5 seconds
 			}	
 		}
 		else
@@ -485,19 +633,46 @@ Health_Monitor(100_x_HP_Character, 0_x_HP_Character, Y_HP_Character, HP_color_ch
 	
 	if HP_Monitor_State[5] = 1
 	{	
-		Monitor_Health_5 := (((100_x_HP_Character[5] - 0_x_HP_Character[5]) / 100 * heal_at_Percent[5]) + 0_x_HP_Character[5])
 		ifwinactive, %Primary_Client%
 		{	
 			PixelGetColor, Current_Health_5, Monitor_Health_5, Y_HP_Character[5], RGB
 			if (Current_Health_5 = HP_color_character[5]) ; verifying pixel grabbed is same as hp bar red
 			{
-			;msgbox, do nothing 5 ;	nothing						sleep -1
 				sleep -1
+				sleep -1
+			}
+			else if (Ctrl_state[5] = 1) and (alt_state[5] = 0) and (shift_state[5] = 0)
+			{
+				Ctrl_Key_function(Primary_Heal_5, Healer_PID, delay)
+			}
+			else if (Alt_state[5] = 1) and (Ctrl_state[5] = 0) and (shift_state[5] = 0)
+			{			
+				Alt_Key_function(Primary_Heal_5, Healer_PID, delay)
+			}
+			else if (shift_state[5] = 1) and (Ctrl_state[5] = 0) and (alt_state[5] = 0)
+			{
+				Shift_Key_function(Primary_Heal_5, Healer_PID, delay)
+			}
+			else if (alt_state[5] = 1) and (ctrl_state[5] = 1) and (shift_state[5] = 0)
+			{
+				Alt_Ctrl_Key_function(Primary_Heal_5, Healer_PID, delay)
+			}
+			else if (shift_state[5] = 1) and (Ctrl_state[5] = 1) and (alt_state[5] = 0)
+			{
+				Shift_Ctrl_Key_function(Primary_Heal_5, Healer_PID, delay)
+			}
+			else if (shift_state[5] = 1) and (alt_state[5] = 1) and (Ctrl_state[5] = 0)
+			{
+				Shift_Alt_Key_function(Primary_Heal_5, Healer_PID, delay)
+			}
+			else if (shift_state[5] = 1) and (alt_state[5] = 1) and (Ctrl_state[5] = 1)
+			{
+				Shift_Alt_Ctrl_Key_function(Primary_Heal_5, Healer_PID, delay)
 			}
 			else
 			{
 				controlsend,, % Primary_Heal[5], %Healer_PID% ; pixel grabbed is not red meaning health is lost
-				sleep, 350 ; 3.5 seconds
+				sleep, 2500 ; 3.5 seconds
 			}
 		}
 		else
@@ -508,26 +683,100 @@ Health_Monitor(100_x_HP_Character, 0_x_HP_Character, Y_HP_Character, HP_color_ch
 	
 	if HP_Monitor_State[6] = 1
 	{	
-		Monitor_Health_6 := (((100_x_HP_Character[6] - 0_x_HP_Character[6]) / 100 * heal_at_Percent[6]) + 0_x_HP_Character[6])
 		ifwinactive, %Primary_Client%
 		{
-		PixelGetColor, Current_Health_6, Monitor_Health_6, Y_HP_Character[6], RGB
-		if (Current_Health_6 = HP_color_character[6]) ; verifying pixel grabbed is same as hp bar red
-		{
-			;msgbox, do nothing 6 ;	nothing						sleep -1
-			sleep -1
-		}
-		else
-		{
-			controlsend,, % Primary_Heal[6], %Healer_PID% ; pixel grabbed is not red meaning health is lost
-			sleep, 350 ; 3.5 seconds
-		}	
+			PixelGetColor, Current_Health_6, Monitor_Health_6, Y_HP_Character[6], RGB
+			if (Current_Health_6 = HP_color_character[6]) ; verifying pixel grabbed is same as hp bar red
+			{
+				sleep -1
+			}
+			else if (Ctrl_state[6] = 1) and (alt_state[6] = 0) and (shift_state[6] = 0)
+			{
+				Ctrl_Key_function(Primary_Heal_6, Healer_PID, delay)
+			}
+			else if (Alt_state[6] = 1) and (Ctrl_state[6] = 0) and (shift_state[6] = 0)
+			{			
+				Alt_Key_function(Primary_Heal_6, Healer_PID, delay)
+			}
+			else if (shift_state[6] = 1) and (Ctrl_state[6] = 0) and (alt_state[6] = 0)
+			{
+				Shift_Key_function(Primary_Heal_6, Healer_PID, delay)
+			}
+			else if (alt_state[6] = 1) and (ctrl_state[6] = 1) and (shift_state[6] = 0)
+			{
+				Alt_Ctrl_Key_function(Primary_Heal_6, Healer_PID, delay)
+			}
+			else if (shift_state[6] = 1) and (Ctrl_state[6] = 1) and (alt_state[6] = 0)
+			{
+				Shift_Ctrl_Key_function(Primary_Heal_6, Healer_PID, delay)
+			}
+			else if (shift_state[6] = 1) and (alt_state[6] = 1) and (Ctrl_state[6] = 0)
+			{
+				Shift_Alt_Key_function(Primary_Heal_6, Healer_PID, delay)
+			}
+			else if (shift_state[6] = 1) and (alt_state[6] = 1) and (Ctrl_state[6] = 1)
+			{
+				Shift_Alt_Ctrl_Key_function(Primary_Heal_6, Healer_PID, delay)
+			}
+			else
+			{
+				controlsend,, % Primary_Heal[6], %Healer_PID% ; pixel grabbed is not red meaning health is lost
+				sleep, 2500 ; 3.5 seconds
+			}	
 		}
 		else
 		{
 			return
 		}
 	}
-	endfunction:
 	return
 }
+	
+	Shift_Key_function(key, window, delay)
+	{
+		controlsend,,{shiftdown}%key%{Shiftup}, %window%
+		sleep %delay%
+		retUrn
+	}
+	
+	Alt_Key_function(key, window, delay)
+	{
+		controlsend,,{Altdown}%key%{Altup}, %window%
+		sleep %delay%
+		return
+	}
+	
+	Ctrl_Key_function(key, window, delay)
+	{
+		controlsend,,{Ctrldown}%key%{Ctrlup}, %window%
+		sleep %delay%
+		return
+	}
+	
+	Alt_Ctrl_Key_function(key, window, delay)
+	{
+		controlsend,,{Ctrldown}{AltDown}%key%{Ctrlup}{Altup}, %window%
+		sleep %delay%
+		return
+	}
+	
+	Shift_Ctrl_Key_function(key, window, delay)
+	{
+		controlsend,,{Ctrldown}{Shiftdown}%key%{Ctrlup}{Shiftup}, %window%
+		sleep %delay%
+		return
+	}
+	
+	Shift_Alt_Key_function(key, window, delay)
+	{
+		controlsend,,{Shiftdown}{Altdown}%key%{Shiftup}{Altup}, %window%
+		sleep %delay%
+		return
+	}
+	
+	Shift_Alt_Ctrl_Key_function(key, window, delay)
+	{
+		controlsend,,{Ctrldown}{altdown}{shiftdown}%key%{Ctrlup}{altup}{shiftup}, %window%
+		sleep %delay%
+		return
+	}
